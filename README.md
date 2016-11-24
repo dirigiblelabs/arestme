@@ -20,4 +20,4 @@ var response = require("net/http/response");
 entitySvc.service(request, response);
 </pre>
 This setup assumes default mapping of resource path, verb and requested MIME type to DAO method names.
-This can be easily changed or amended in the exposed cfg object (<pre>with the example above: EntitySvc.prototype.cfg</pre>)
+This can be easily changed or amended in the exposed cfg object (with the example above: EntitySvc.prototype.cfg)

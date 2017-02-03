@@ -49,8 +49,29 @@ var http = new HttpController()
 Notice that here we also specified that our resource handler produces 'application/json' media type. The controller will look for Accepts header in the request that matches this media type and will resolve a match only if it finds one. Similiarly it handles a specification for consumed media type by resource handlers (e.g. by POST verb handlers) but it looks for matching Content-Type header instead. The produces and consumes specifications can be provided as the last arguments of the addResourceHanlder method too.
 When the controller finds multiple handler mathches to the same request, they are wheighed and the most specific wins. For example the request path '1/abcd' will match both resource specifications '{id}/{name}' and '{id}/abcd' and the handler for the second one, being more specific, wins. 
 
+
 Data Services
+
 While HttpController enables you to design REST Services 'in the wild', DataService extends it to introduce some hygene and actually define a REST protocol for handlng backend data via HTTP, similiar to what OData does. It levereges the core mechanism in HttpController to map HTTP resources to function handlers and provides its own resource specification for that, which constitutes the HTTP Data Protocol definition. You can still take advantage of the HttpController's built-in extensibility and add your own resource handler definitions, or redefine and remove the default ones. On this stage we rather refer to them rather as 'default' than 'standard' and do not restrict changes in them. As far as the data protocol is concerned, the handlers for the defined resources are mapped to standard functions, provided by a HandlersProvider. If you wnated to implement a specific data access protocol, you could provide your own HandlerProvider to a DataService to effectively specify your own resource handling functions. Or you could achieve the same by overwriting the handler function in a resource handler definition. DataService will take as first parameter in its constructor either a HandlerProvider or a (daoism/dao)DAO-like object. The latter is actually used by the default HandlerProvider (DefaultHandlerProvider), which happens to be designed to work smoothly with DAOs produced by the daoism library or objects with similiar structure. There is no hard dpeendency between the two projects apart from that, i.e. no type checking or so.
 
+<pre>
+var DataService = require('arestme/data_service').DataService;
+//we use the daoism library to get us a shiny dao object in fewer lines
+var dao = require('daoism/dao').get({
+  dbName: "TBL_A",
+  properties:[{
+    name: "id",
+    dbName: "A_ID",
+    id: true,
+    required: true
+  }]
+});
+var dataService = new DataService(dao);
+dataService.service();
+</pre>
+Once we construct a new instance of DataService we've got ourselves a REST service API that knows how to query(list), find, create, update, remove and count the persistent entities mapped by the dao. That takes us one step further at actually mapping sql statements and result sets (or whatever you implemented in your HanldersProvider) to HTTP requests and payload entities.
+DataService will install the standard endpoint resource path and the mapped handlers and also take care to add resource paths and handlers for each association defined by the wrapped dao.
+
 Why not OData compliant implementation?
+
 First of all, we borrowed some concepts from OData already, the ones that we liked and we felt absolutely necessary. But instead of blindly aiming at comliance with OData, we prefer to add features on on-demand basis. While we certainly take into account how they are relaized in OData we may not necessarily follow the same path, should there be better alternatives the way we see it. Maybe one day we will be close enough to make DataService compliant or start a project that levereges it in that direction, but right now that's not a goal on its own for us.

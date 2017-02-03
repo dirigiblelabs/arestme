@@ -48,15 +48,27 @@ testDAO1.find = function(id){
 };
 
 require('log/loggers').setLevel(6)
-//as functional mixin
-var daoService = require('arestme/data_service').asService(testDAO1, {}, 'Test DAO Service');
 
-daoService.service();
-//console.info(JSON.stringify(daoService.getResourceHandlersMap(), null, 2));
-
+var HandlersProvider = require('arestme/data_service').HandlersProvider;
+var MyProvider = function(){
+	HandlersProvider.call(this);
+};
+MyProvider.prototype = Object.create(HandlersProvider.prototype);
+MyProvider.prototype.getHandlers= function(){
+	return {
+		query: function(){console.info('I am in query');},
+		get: function(){console.info('I am in get');}
+	};
+};
+var provider = new MyProvider();
+var MyService1 = function(dao){
+	require('arestme/data_service').DataService.call(this, provider, 'My service');
+};
+MyService1.prototype = Object.create(require('arestme/data_service').DataService.prototype);
+var svc1 = new MyService1();
 var assert = require('core/assert');
 try{
-	var members = Object.keys(daoService);
+	var members = Object.keys(svc1);
 	assert.assertTrue(members.indexOf("dao")>-1);
 	assert.assertTrue(members.indexOf("logger")>-1);
 	assert.assertTrue(members.indexOf("_oConfiguration")>-1);	
@@ -69,35 +81,19 @@ try{
 }
 
 try{
-	assert.assertTrue(Object.keys(daoService.handlers).length===9);
+	assert.assertTrue(Object.keys(svc1.handlers).length===9);
 } catch(err){
 	console.error(err);
 }
 
 try{
-	var handlersMap = daoService.getResourceHandlersMap();
+	var handlersMap = svc1.getResourceHandlersMap();
 	assert.assertTrue(Object.keys(handlersMap).length===5);
 } catch(err){
 	console.error(err);
 }
 
-var HandlersProvider = require('arestme/data_service').HandlersProvider;
-var MyProvider = function(){
-	HandlersProvider.call(this);
-};
-MyProvider.prototype = Object.create(HandlersProvider.prototype);
-MyProvider.prototype.getHandlers= function(){
-	return {
-		query: function(){console.info('I am in query');},
-		get: function(){console.info('I am in get');}
-	}
-}
-var provider = new MyProvider();
-var MyService1 = function(dao){
-	require('arestme/data_service').DataService.call(this, provider, 'My service');
-};
-MyService1.prototype = Object.create(require('arestme/data_service').DataService.prototype);
-var svc1 = new MyService1();
+
 console.info(JSON.stringify(svc1.getResourceHandlersMap(), null, 2))
 svc1.service();
 //daoService.service();

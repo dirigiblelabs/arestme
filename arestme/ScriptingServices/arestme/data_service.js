@@ -34,7 +34,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 	var create = function(context, io){
 		var input = io.request.readInputText();
 	    var entity = JSON.parse(input);
-	    notify('onEntityInsert', entity);
+	    notify.call(self, 'onEntityInsert', entity);
 	    try{
 			entity[dao.orm.getPrimaryKey()] = dao.insert(entity, context.queryParams.cascaded);
 			io.response.setStatus(io.response.OK);
@@ -52,7 +52,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		var cascaded = context.queryParams.cascaded;			
 	 	try{
 			dao.remove(id, cascaded);
-			notify('onAfterRemove', id);
+			notify.call(self, 'onAfterRemove', id);
 			io.response.setStatus(io.response.NO_CONTENT);
 		} catch(e) {
     	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
@@ -67,7 +67,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		var input = io.request.readInputText();
 	    var entity = JSON.parse(input);
 	    //check for potential mismatch in path id and id in input
-	    notify('onEntityUpdate', entity);
+	    notify.call(self, 'onEntityUpdate', entity);
 	    try{
 			entity[dao.orm.getPrimaryKey()] = dao.update(entity);
 			io.response.setStatus(io.response.NO_CONTENT);
@@ -103,7 +103,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 
 	    try{
 			var entity = dao.find.apply(dao.ctx || dao, [id, select]);
-			notify('onAfterFind', entity);
+			notify.call(self, 'onAfterFind', entity);
 			if(!entity){
 				self.logger.error("Record with id: " + id + " does not exist.");
         		_oHttpController.sendError(io.response.NOT_FOUND, "Record with id: " + id + " does not exist.");
@@ -213,7 +213,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 
 	    try{
 			var entities = dao.list.apply(dao, args) || [];
-			notify('onAfterList', entities);
+			notify.call(self, 'onAfterList', entities);
 	        var jsonResponse = JSON.stringify(entities, null, 2);
 	    	io.response.println(jsonResponse);
 		} catch(e) {

@@ -143,7 +143,7 @@ var HttpController = exports.HttpController = function(oConfiguration){
 	};
 	
   	this.service = function(request, response){
-  		
+  
   		request = request || require("net/http/request");
 		var requestPath = request.getAttribute("path") || "";
 		var method = request.getMethod().toLowerCase();
@@ -166,7 +166,7 @@ var HttpController = exports.HttpController = function(oConfiguration){
 		var resourcePath = getHttpResourcePath();
 		var io = {request: request, response:response};
 		
-		if(resourceHandler){			
+		if(resourceHandler){
 			var ctx = {
 				"path": {
 					"resolvedPath": matches[0].p
@@ -177,7 +177,7 @@ var HttpController = exports.HttpController = function(oConfiguration){
 			if(matches[0].pathParams){
 				ctx.pathParams = matches[0].pathParams;
 			}
-			ctx.queryParams = queryParams;			
+			ctx.queryParams = queryParams;
 			if(verbHandler.beforeHandle){
 			 	if(verbHandler.beforeHandle.constructor !== Function)
 			 		throw Error('Invalid configuration exception: verbHandler.beforeHandle is not a function');

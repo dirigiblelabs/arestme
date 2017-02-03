@@ -212,7 +212,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		}
 
 	    try{
-			var entities = dao.list.apply(dao.ctx || dao, args) || [];
+			var entities = dao.list.apply(dao, args) || [];
 			notify('onAfterList', entities);
 	        var jsonResponse = JSON.stringify(entities, null, 2);
 	    	io.response.println(jsonResponse);
@@ -347,21 +347,21 @@ DAOHandlersProvider.prototype.constructor = DAOHandlersProvider;
 var HttpController = require('arestme/http').HttpController;
 	
 var DataService = exports.DataService = function(dao, loggerName){
-	if(!dao)
-		throw Error('Illegal argument exception: dao['+dao+']');
+	if(arguments[0]===undefined)
+		throw Error('Illegal argument exception: arguments[0] is undefined');
 
-	this.logger = require('log/loggers').get((loggerName||'DAO Service'));
+	this.logger = require('log/loggers').get((loggerName||'Data Service'));
 	
 	HttpController.call(this, {});
 
-	this.daoProvider;
+	this.handlersProvider;
 	if(arguments[0] instanceof HandlersProvider){
-		this.daoProvider = arguments[0];
-		this.daoProvider.oHttpController = this;
+		this.handlersProvider = arguments[0];
+		this.handlersProvider.oHttpController = this;
 	} else {
-		this.daoProvider = new DAOHandlersProvider(dao, this);
+		this.handlersProvider = new DAOHandlersProvider(arguments[0], this);
 	}
-	this.handlers = this.daoProvider.getHandlers();
+	this.handlers = this.handlersProvider.getHandlers();
 	if(this.handlers['query'])
 		HttpController.prototype.addResourceHandlers.call(this, {
 			"": {
@@ -451,27 +451,5 @@ var DataService = exports.DataService = function(dao, loggerName){
 
 DataService.prototype = Object.create(HttpController.prototype);
 DataService.prototype.constructor = DataService;
-
-//performs mixein of the provided dao into the target object
-exports.asService = DataService.prototype.asService = DataService.prototype.asRestAPI = function(dao, target, loggerName) {
-
-	target = target || function(){};
-	
-	//inject the dao dependency if not already present
-	if(dao && !target.dao)
-		target.dao = dao;
-
-	//mixin the rest api into target
-	DataService.call(target, dao, loggerName);
-	
-	//this sux but we don't want to replace the target object prototype
-	var targetProto = Object.getPrototypeOf(target);
-	targetProto.addResourceHandler = HttpController.prototype.addResourceHandler;
-	targetProto.addResourceHandlers = HttpController.prototype.addResourceHandlers;
-	targetProto.getResourceHandlersMap = HttpController.prototype.getResourceHandlersMap;	
-	targetProto.sendError = HttpController.prototype.sendError;	
-	targetProto.closeResponse = HttpController.prototype.closeResponse;
-	return target;
-};
 		
 })();

@@ -81,28 +81,36 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 	
 	var get = function(context, io){
 		var id = context.pathParams.id;
-		var expanded = context.queryParams.expanded;
-		var select = context.queryParams.select || context.queryParams['$expand'];
-		if(!select && expanded !== undefined && expanded){
-			if(dao.orm.associationSets)
-				select = Object.keys(dao.orm.associationSets).join(',');
-			else
-				select = expanded;//old style daos
-		}
-		if(select){
-			select = String(new java.lang.String(""+select));
-			select = select.split(',').map(function(sel){
-				return sel.trim();
-			});
-		}
 		//id is mandatory parameter and an integer
 		if(id === undefined || isNaN(parseIntStrict(id))) {
 			_oHttpController.sendError(io.response.BAD_REQUEST, "Invalid id parameter: " + id);
 			return;
 		}
-
+		var $expand = context.queryParams['$expand'];
+		if($expand){
+			if($expand===true || ($expand.toLowerCase() === '$all' && dao.orm.associationSets)) {
+				$expand = Object.keys(dao.orm.associationSets).join(',');
+			} else {
+				$expand = String(new java.lang.String(""+$expand));
+				$expand = $expand.split(',').map(function(exp){
+					return exp.trim();
+				});
+			}
+		}
+		var $select = context.queryParams['$select'];
+		if($select){
+			if($select===true || ($select.toLowerCase() === '$all' && dao.orm.associationSets)) {
+				$select = Object.keys(dao.orm.associationSets).join(',');
+			} else {
+				$select = String(new java.lang.String(""+$select));
+				$select = $select.split(',').map(function(sel){
+					return sel.trim();
+				});
+			}
+		}		
+		
 	    try{
-			var entity = dao.find.apply(dao.ctx || dao, [id, select]);
+			var entity = dao.find.apply(dao, [id, $expand, $select]);
 			notify.call(self, 'onAfterFind', entity);
 			if(!entity){
 				self.logger.error("Record with id: " + id + " does not exist.");
@@ -184,33 +192,19 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		if(context.err)
 			return;
 	
-		var offset = context.queryParams.offset;
-		var limit = context.queryParams.limit;
-		var sort = context.queryParams.sort;
-		var order = context.queryParams.order;			
-		var id = context.pathParams.id;
-
-		var expanded = context.queryParams.expanded;
-		var select = context.queryParams.select || context.queryParams['$expand'];
-		if(!select && expanded !== undefined && expanded){
-			if(dao.orm.associationSets)
-				select = Object.keys(dao.orm.associationSets).join(',');
-			else {
-				select = expanded;//old style daos
-			}
-		}
-		var args = [];
-		if(dao.orm.associationSets){
-			args = [context.queryParams];
-		} else {
-			args = Array.prototype.slice.call(arguments);
-			if(args.length>5){
-				args = [limit, offset, sort, order, expanded].concat(args.slice(args.length-1));
+		var $expand = context.queryParams['$expand'];
+		if($expand){
+			if($expand===true || ($expand.toLowerCase() === '$all' && dao.orm.associationSets)) {
+				$expand = Object.keys(dao.orm.associationSets).join(',');
 			} else {
-				args = [limit, offset, sort, order, expanded];
+				$expand = String(new java.lang.String(""+$expand));
+				$expand = $expand.split(',').map(function(sel){
+					return sel.trim();
+				});
 			}
 		}
-
+		context.queryParams.$expand = $expand;
+		var args = [context.queryParams];
 	    try{
 			var entities = dao.list.apply(dao, args) || [];
 			notify.call(self, 'onAfterList', entities);

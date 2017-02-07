@@ -69,11 +69,10 @@ var svc1 = new MyService1();
 var assert = require('core/assert');
 try{
 	var members = Object.keys(svc1);
-	assert.assertTrue(members.indexOf("dao")>-1);
 	assert.assertTrue(members.indexOf("logger")>-1);
 	assert.assertTrue(members.indexOf("_oConfiguration")>-1);	
 	assert.assertTrue(members.indexOf("handlers")>-1);	
-	assert.assertTrue(members.indexOf("daoProvider")>-1);		
+	assert.assertTrue(members.indexOf("handlersProvider")>-1);		
 	assert.assertTrue(members.indexOf("normalizeMediaTypeHeaderValue")>-1);
 	assert.assertTrue(members.indexOf("service")>-1);	
 } catch(err){
@@ -81,14 +80,14 @@ try{
 }
 
 try{
-	assert.assertTrue(Object.keys(svc1.handlers).length===9);
+	assert.assertTrue(Object.keys(svc1.handlers).length===2);
 } catch(err){
 	console.error(err);
 }
 
 try{
 	var handlersMap = svc1.getResourceHandlersMap();
-	assert.assertTrue(Object.keys(handlersMap).length===5);
+	assert.assertTrue(Object.keys(handlersMap).length===2);
 } catch(err){
 	console.error(err);
 }

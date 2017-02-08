@@ -28,7 +28,7 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		if(typeof func !== 'function')
 			throw Error('Illegal argument. Not a function: ' + func);
 		var args = [].slice.call(arguments);
-		func.apply(this, args.slice(1));
+		return func.apply(this, args.slice(1));
 	};
 	
 	var create = function(context, io){
@@ -204,11 +204,26 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 			}
 		}
 		context.queryParams.$expand = $expand;
+		var $select = context.queryParams['$select'];
+		if($select){
+			if($select===true || ($select.toLowerCase() === '$all' && dao.orm.associationSets)) {
+				$select = Object.keys(dao.orm.associationSets).join(',');
+			} else {
+				$select = String(new java.lang.String(""+$select));
+				$select = $select.split(',').map(function(sel){
+					return sel.trim();
+				});
+			}
+		}
+		context.queryParams.$select = $select;
 		var args = [context.queryParams];
 	    try{
 			var entities = dao.list.apply(dao, args) || [];
-			notify.call(self, 'onAfterList', entities);
-	        var jsonResponse = JSON.stringify(entities, null, 2);
+			var _entities = notify.call(self, 'postQuery', entities, context);
+			if(_entities===undefined){
+				_entities = entities;
+			}
+	        var jsonResponse = JSON.stringify(_entities, null, 2);
 	    	io.response.println(jsonResponse);
 		} catch(e) {
     	    var errorCode = io.response.INTERNAL_SERVER_ERROR ;

@@ -100,7 +100,7 @@ var HttpController = exports.HttpController = function(oConfiguration){
 			isConsumeMatched = true;
 		} else  {
 			var matchedConsumesMIME;
-			if(consumesMediaTypes && consumesMediaTypes.length){
+			if(contentTypeMediaTypes && consumesMediaTypes && consumesMediaTypes.length){
 				matchedConsumesMIME = contentTypeMediaTypes.filter(function(contentTypeMediaType) {
 				    return consumesMediaTypes.indexOf(contentTypeMediaType) > -1;
 				});

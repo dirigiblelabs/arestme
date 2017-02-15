@@ -273,3 +273,7 @@ HttpController.prototype.closeResponse = function(){
 	response.flush();
 	response.close();
 };
+
+exports.get = function(oConfiguration){
+	return new HttpController(oConfiguration);
+};

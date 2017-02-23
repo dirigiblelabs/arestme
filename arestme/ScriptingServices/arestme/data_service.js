@@ -53,10 +53,9 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 	};
 	
 	var remove = function(context, io){
-		var id = context.pathParams.id;
-		var cascaded = context.queryParams.cascaded;			
+		var id = context.pathParams.id;		
 	 	try{
-			dao.remove(id, cascaded);
+			dao.remove(id);
 			notify.call(self, 'onAfterRemove', id);
 			io.response.setStatus(io.response.NO_CONTENT);
 		} catch(e) {

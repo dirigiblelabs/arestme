@@ -204,14 +204,16 @@ HttpController.prototype.addResourceHandlers = function(handlersMap){
 		throw Error('Illegal argument exception: handlersMap[' + handlersMap + ']');
 	var aResourcePaths = Object.keys(handlersMap);	
 	for(var i=0; i<aResourcePaths.length; i++){
-		var verbNames = Object.keys(handlersMap[aResourcePaths[i]]);
-		for(var j=0; j<verbNames.length;j++){
-			var handlerDefs = handlersMap[aResourcePaths[i]][verbNames[j]];
-			if(handlerDefs.constructor !== Array)//For backwards compatibility
-				handlerDefs = [handlerDefs]
-			for(var k = 0; k<handlerDefs.length; k++){
-				var handlerDef = handlerDefs[k];
-				HttpController.prototype.addResourceHandler.call(this, aResourcePaths[i], verbNames[j], handlerDef['handler'], handlerDef['consumes'], handlerDef['produces'], handlerDef['beforeHandler']);
+		var verbHandlerNames = Object.keys(handlersMap[aResourcePaths[i]]);
+		for(var j=0; j<verbHandlerNames.length;j++){
+			var verbHandlerDefs = handlersMap[aResourcePaths[i]][verbHandlerNames[j]];
+			if(verbHandlerDefs.constructor !== Array){//Accept objects for backwards compatibility
+				this.logger.warn('Verb handler value must be an array of objects. Objects will not be supported in near future');
+				verbHandlerDefs = [verbHandlerDefs]
+			}
+			for(var k = 0; k<verbHandlerDefs.length; k++){
+				var verbHandlerDef = verbHandlerDefs[k];
+				HttpController.prototype.addResourceHandler.call(this, aResourcePaths[i], verbHandlerNames[j], verbHandlerDef['handler'], verbHandlerDef['consumes'], verbHandlerDef['produces'], verbHandlerDef['beforeHandler']);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-# arestme
+# aRESTme
 Utility library for quick and flexible enabling of REST service endpoints mapped to functional handlers.
 The minimal and basic functionality is provided by the HttpController class. 
 

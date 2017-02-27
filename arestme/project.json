@@ -1,1 +1,8 @@
-{"guid":"arestme","repository":{"type":"git","branch":"master","url":"https://github.com/dirigiblelabs/arestme.git"}}
+{
+    "guid":"arestme",
+    "repository":{
+        "type":"git",
+        "branch":"1.0",
+        "url":"https://github.com/dirigiblelabs/arestme.git"
+    }
+}

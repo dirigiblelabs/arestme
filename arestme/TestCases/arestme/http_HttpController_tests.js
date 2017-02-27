@@ -4,13 +4,13 @@ var HttpController = require('arestme/http').HttpController;
 var http = new HttpController()
 .addResourceHandlers({
 	"":{
-		"get": {
+		"get": [{
 			produces: ['application/json'],
 			handler: function(context, io){
 				io.response.setStatus(io.response.OK);
 				io.response.println('OK');
 			}	
-		}
+		}]
 	}
 })
 .addResourceHandler("{id}","get", function(ctx, io){

@@ -21,7 +21,7 @@ The `arestme/data_service` module leverages the REST API building framework from
 
 The framework is built on a defined contract with [handling function](https://github.com/dirigiblelabs/arestme/wiki/5.-HandlersProvider-SPI) providers sharing common interface so different functions can be 'plugged-in' depending on different backend handling needs. There is a [default handler](https://github.com/dirigiblelabs/arestme/wiki/4.-DAOHandlersProvider) that works with DAOs from the [daoism](https://github.com/dirigiblelabs/daoism) project, or functionally equivalent objects (there is no hard dependency to daoism in fact). In this case, all that you need to have a fully functional HTTP DataService protocol enabled service is to supply a dao, which is largely an ORM configuration. Or if you need something more custom, you can provide your own [handler provider](https://github.com/dirigiblelabs/arestme/wiki/5.-HandlersProvider-SPI) with functions that will react to the requests specified in the [HTTP DataService Protocol](https://github.com/dirigiblelabs/arestme/wiki/6.-HTTP-DataService-Protocol).
 
-Here is an example of a data service based on daoism DAO ORM definition:
+Here is an example of a data service based on daoism [DAO ORM](https://github.com/dirigiblelabs/daoism/wiki/DAO-ORM-Configuration) definition:
 <pre>
 var DataService = require('arestme/data_service').DataService;
 //we use the daoism library to get us a shiny dao object in fewer lines

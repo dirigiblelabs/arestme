@@ -42,7 +42,7 @@ var orm1 = {
 		name: 'rel1',
 		targetDao: function(){return testDAO2;},
 		joinKey: "baId",
-		associationType: "one-to-many",
+		type: "one-to-many",
 	}]
 };
 var testDAO1= require('daoism/dao').get(orm1);

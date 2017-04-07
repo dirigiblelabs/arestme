@@ -72,16 +72,19 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		var input = io.request.readInputText();
 	    var entity = JSON.parse(input);
 	    //check for potential mismatch in path id and id in input
-	    notify.call(self, 'onEntityUpdate', entity, id);
-	    try{
-			entity[dao.orm.getPrimaryKey()] = dao.update(entity);
-			io.response.setStatus(io.response.NO_CONTENT);
-		} catch(e) {
-    	    var errorCode = io.response.INTERNAL_SERVER_ERROR ;
-    	    self.logger.error(e.message, e);
-        	_oHttpController.sendError(errorCode, e.message);
-        	throw e;
-		}
+	    var ctx = {};
+	    notify.call(self, 'onEntityUpdate', entity, id, ctx);
+	    if(!ctx.err){
+	    	try{
+				entity[dao.orm.getPrimaryKey()] = dao.update(entity);
+				io.response.setStatus(io.response.NO_CONTENT);
+			} catch(e) {
+	    	    var errorCode = io.response.INTERNAL_SERVER_ERROR ;
+	    	    self.logger.error(e.message, e);
+	        	_oHttpController.sendError(errorCode, e.message);
+	        	throw e;
+			}
+	    }//TODO
 	};
 	
 	var get = this.get = function(context, io){
@@ -116,7 +119,10 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		
 	    try{
 			var entity = dao.find.apply(dao, [id, $expand, $select]);
-			notify.call(self, 'onAfterFind', entity);
+			notify.call(self, 'onAfterFind', entity, context);
+			if(context.err){
+				return;//TODO?
+			}
 			if(!entity){
 				self.logger.error("Record with id: " + id + " does not exist.");
         		_oHttpController.sendError(io.response.NOT_FOUND, "Record with id: " + id + " does not exist.");

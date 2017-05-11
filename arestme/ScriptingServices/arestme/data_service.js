@@ -34,9 +34,8 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 	var create = this.create = function(context, io){
 		var input = io.request.readInputText();
 	    var entity = JSON.parse(input);
-	    var ctx= {};
-		notify.call(self, 'onEntityInsert', entity, ctx);
-	  	if(!ctx.err){	
+		notify.call(self, 'onEntityInsert', entity, context);
+	  	if(!context.err){	
 		    try{
 				var ids = dao.insert(entity, context.queryParams.$cascaded || true);
 				notify.call(self, 'onAfterEntityInsert', entity, ids, context);
@@ -58,13 +57,12 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 	
 	var remove = this.remove = function(context, io){
 		var id = context.pathParams.id;	
-		var ctx = {};
-		notify.call(self, 'onBeforeRemove', id, ctx);
-		if(!ctx.err){
+		notify.call(self, 'onBeforeRemove', id, context);
+		if(!context.err){
 			try{
 				dao.remove(id);
-				notify.call(self, 'onAfterRemove', id, ctx);
-				if(!ctx.err){	
+				notify.call(self, 'onAfterRemove', id, context);
+				if(!context.err){	
 					io.response.setStatus(io.response.NO_CONTENT);
 				}
 			} catch(e) {

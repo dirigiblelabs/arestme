@@ -34,37 +34,45 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 	var create = this.create = function(context, io){
 		var input = io.request.readInputText();
 	    var entity = JSON.parse(input);
-	    notify.call(self, 'onEntityInsert', entity);
-	    try{
-			var ids = dao.insert(entity, context.queryParams.$cascaded || true);
-			notify.call(self, 'onAfterEntityInsert', entity, ids);
-			if(ids && ids.constructor!== Array)	{
-				io.response.setHeader('Location', $.getRequest().getRequestURL().toString() + '/' + ids);
-				io.response.setStatus(io.response.NO_CONTENT);
-			} else {
-				io.response.println(JSON.stringify(ids, null, 2));
-				io.response.setStatus(io.response.OK);
+	    var ctx= {};
+		notify.call(self, 'onEntityInsert', entity, ctx);
+	  	if(!ctx.err){	
+		    try{
+				var ids = dao.insert(entity, context.queryParams.$cascaded || true);
+				notify.call(self, 'onAfterEntityInsert', entity, ids, context);
+				if(ids && ids.constructor!== Array)	{
+					io.response.setHeader('Location', $.getRequest().getRequestURL().toString() + '/' + ids);
+					io.response.setStatus(io.response.NO_CONTENT);
+				} else {
+					io.response.println(JSON.stringify(ids, null, 2));
+					io.response.setStatus(io.response.OK);
+				}
+			} catch(e) {
+	    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
+	    	    self.logger.error(e.message, e);
+	        	_oHttpController.sendError(errorCode, e.message);
+	        	throw e;
 			}
-		} catch(e) {
-    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
-    	    self.logger.error(e.message, e);
-        	_oHttpController.sendError(errorCode, e.message);
-        	throw e;
-		}		
+		}
 	};
 	
 	var remove = this.remove = function(context, io){
 		var id = context.pathParams.id;	
-		notify.call(self, 'onBeforeRemove', id);
-	 	try{
-			dao.remove(id);
-			notify.call(self, 'onAfterRemove', id);
-			io.response.setStatus(io.response.NO_CONTENT);
-		} catch(e) {
-    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
-    	    self.logger.error(e.message, e);
-        	_oHttpController.sendError(errorCode, e.message);
-        	throw e;
+		var ctx = {};
+		notify.call(self, 'onBeforeRemove', id, ctx);
+		if(!ctx.err){
+			try{
+				dao.remove(id);
+				notify.call(self, 'onAfterRemove', id, ctx);
+				if(!ctx.err){	
+					io.response.setStatus(io.response.NO_CONTENT);
+				}
+			} catch(e) {
+	    	    var errorCode = io.response.INTERNAL_SERVER_ERROR;
+	    	    self.logger.error(e.message, e);
+	        	_oHttpController.sendError(errorCode, e.message);
+	        	throw e;
+			}
 		}
 	};
 		

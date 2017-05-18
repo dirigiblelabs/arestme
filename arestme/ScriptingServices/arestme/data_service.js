@@ -252,6 +252,11 @@ var DAOHandlersProvider = exports.DAOHandlersProvider = function(dao, oHttpContr
 		if(context.err)
 			return;	
 		var args = [context.queryParams];
+		for(var propName in context.queryParams){
+			var val = context.queryParams[propName];
+			if(val==='$null')
+				context.queryParams[propName] = null;
+		}
 	    try{
 			var entities = dao.list.apply(dao, args) || [];
 			var _entities = notify.call(self, 'postQuery', entities, context);
